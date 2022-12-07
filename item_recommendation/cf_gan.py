@@ -1,7 +1,7 @@
 import tensorflow as tf
 from dis_model import DIS
 from gen_model import GEN
-import cPickle
+import pickle as cPickle
 import numpy as np
 import utils as ut
 import multiprocessing
@@ -102,7 +102,7 @@ print("--->", USER_NUM, ITEM_NUM)
 all_items = set(range(ITEM_NUM))
 
 all_users = user_pos_train.keys()
-all_users.sort()
+sorted(all_users)
 
 
 def dcg_at_k(r, k):
@@ -190,7 +190,7 @@ def evaluate(sess, model, which_set = "test"):
     result = np.array([0.] * 3)
     pool = multiprocessing.Pool(cores)
     batch_size = 128
-    test_users = user_pos_test.keys()
+    test_users = list(user_pos_test.keys())
     test_user_num = len(test_users)
     index = 0
     while True:
@@ -200,14 +200,14 @@ def evaluate(sess, model, which_set = "test"):
         index += batch_size
 
         user_batch_rating = sess.run(model.all_rating, {model.u: user_batch})
-        user_batch_rating_uid = zip(user_batch_rating, user_batch)
+        user_batch_rating_uid = list(zip(user_batch_rating, user_batch))
         batch_result = pool.map(which_func, user_batch_rating_uid)
         for re in batch_result:
             result += [re[1], re[4], re[6]]
     pool.close()
     ret = (np.array(result.tolist()[:2]) / test_user_num).tolist()
     ret.append((np.array(result.tolist()[2]) / num_ratings).tolist())
-    ret = zip(["p_5", "ndcg_5", "rmse"], ret)
+    ret = list(zip(["p_5", "ndcg_5", "rmse"], ret))
     return ret
 
 def generate_for_d(sess, model, filename):
@@ -229,8 +229,8 @@ def generate_for_d(sess, model, filename):
 
 
 def main():
-    print "load model..."
-    param = cPickle.load(open(workdir + "model_dns_ori.pkl"))
+    print("load model...")
+    #param = cPickle.load(open(workdir + "model_dns_ori.pkl"))
     param = None
     generator = GEN(ITEM_NUM, USER_NUM, EMB_DIM, lamda=0.0 / BATCH_SIZE, param=param, initdelta=INIT_DELTA,
                     learning_rate=0.001)
@@ -239,10 +239,10 @@ def main():
     mf = MF(ITEM_NUM, USER_NUM, EMB_DIM, lamda=0.1, param=param, initdelta=0.05, learning_rate=0.05)
     generate_uniform(DIS_TRAIN_FILE_UNIFORM) # Uniformly sample negative examples
 
-    config = tf.ConfigProto()
+    config = tf.compat.v1.ConfigProto()
     config.gpu_options.allow_growth = True
-    sess = tf.Session(config=config)
-    sess.run(tf.global_variables_initializer())
+    sess = tf.compat.v1.Session(config=config)
+    sess.run(tf.compat.v1.global_variables_initializer())
 
     result_train_gen = evaluate(sess, generator, "train")
     result_test_gen = evaluate(sess, generator, "test")

@@ -3,7 +3,7 @@ tf.disable_v2_behavior()
 from dis_model_dns import DIS
 from mf_model import MF
 
-import cPickle
+import pickle as cPickle
 import numpy as np
 import multiprocessing
 import time
