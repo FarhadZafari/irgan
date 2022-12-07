@@ -1,7 +1,7 @@
 import tensorflow as tf
 from dis_model import DIS
 from gen_model import GEN
-import cPickle
+import pickle as cPickle
 import numpy as np
 import utils as ut
 import multiprocessing
@@ -229,7 +229,7 @@ def generate_for_d(sess, model, filename):
 
 
 def main():
-    print "load model..."
+    print("load model...")
     param = cPickle.load(open(workdir + "model_dns_ori.pkl"))
     param = None
     generator = GEN(ITEM_NUM, USER_NUM, EMB_DIM, lamda=0.0 / BATCH_SIZE, param=param, initdelta=INIT_DELTA,
