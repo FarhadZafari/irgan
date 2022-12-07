@@ -102,7 +102,7 @@ print("--->", USER_NUM, ITEM_NUM)
 all_items = set(range(ITEM_NUM))
 
 all_users = user_pos_train.keys()
-all_users.sort()
+sorted(all_users)
 
 
 def dcg_at_k(r, k):
