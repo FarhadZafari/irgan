@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from dis_model_dns import DIS
 from mf_model import MF
 
@@ -101,7 +102,7 @@ print("===>", USER_NUM, ITEM_NUM)
 all_items = set(range(ITEM_NUM))
 
 all_users = user_pos_train.keys()
-all_users.sort()
+sorted(all_users)
 
 def generate_dns(sess, model, filename):
     data = []
@@ -215,7 +216,7 @@ def evaluate(sess, model, which_set = "test"):
     while True:
         if index >= test_user_num:
             break
-        user_batch = test_users[index:index + batch_size]
+        user_batch = list(test_users)[index:index + batch_size]
         index += batch_size
 
         user_batch_rating = sess.run(model.all_rating, {model.u: user_batch})
