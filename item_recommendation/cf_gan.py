@@ -229,7 +229,7 @@ def generate_for_d(sess, model, filename):
 
 
 def main():
-    print "load model..."
+    print("load model...")
     param = cPickle.load(open(workdir + "model_dns_ori.pkl"))
     param = None
     generator = GEN(ITEM_NUM, USER_NUM, EMB_DIM, lamda=0.0 / BATCH_SIZE, param=param, initdelta=INIT_DELTA,
