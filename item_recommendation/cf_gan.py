@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from dis_model import DIS
 from gen_model import GEN
 import pickle as cPickle
@@ -239,10 +240,10 @@ def main():
     mf = MF(ITEM_NUM, USER_NUM, EMB_DIM, lamda=0.1, param=param, initdelta=0.05, learning_rate=0.05)
     generate_uniform(DIS_TRAIN_FILE_UNIFORM) # Uniformly sample negative examples
 
-    config = tf.compat.v1.ConfigProto()
+    config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
-    sess = tf.compat.v1.Session(config=config)
-    sess.run(tf.compat.v1.global_variables_initializer())
+    sess = tf.Session(config=config)
+    sess.run(tf.global_variables_initializer())
 
     result_train_gen = evaluate(sess, generator, "train")
     result_test_gen = evaluate(sess, generator, "test")
