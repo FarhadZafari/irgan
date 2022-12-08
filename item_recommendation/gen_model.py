@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import pickle as cPickle
 
 
@@ -13,13 +14,13 @@ class GEN():
         self.learning_rate = learning_rate
         self.g_params = []
 
-        with tf.compat.v1.variable_scope('generator'):
+        with tf.variable_scope('generator'):
             if self.param == None:
                 self.user_embeddings = tf.Variable(
-                    tf.compat.v1.random_uniform([self.userNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
+                    tf.random_uniform([self.userNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
                                       dtype=tf.float32))
                 self.item_embeddings = tf.Variable(
-                    tf.compat.v1.random_uniform([self.itemNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
+                    tf.random_uniform([self.itemNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
                                       dtype=tf.float32))
                 self.item_bias = tf.Variable(tf.zeros([self.itemNum]))
             else:
@@ -29,9 +30,9 @@ class GEN():
 
             self.g_params = [self.user_embeddings, self.item_embeddings, self.item_bias]
 
-        self.u = tf.compat.v1.placeholder(tf.int32)
-        self.i = tf.compat.v1.placeholder(tf.int32)
-        self.reward = tf.compat.v1.placeholder(tf.float32)
+        self.u = tf.placeholder(tf.int32)
+        self.i = tf.placeholder(tf.int32)
+        self.reward = tf.placeholder(tf.float32)
 
         self.u_embedding = tf.nn.embedding_lookup(self.user_embeddings, self.u)
         self.i_embedding = tf.nn.embedding_lookup(self.item_embeddings, self.i)
@@ -42,10 +43,10 @@ class GEN():
             tf.reshape(tf.nn.softmax(tf.reshape(self.all_logits, [1, -1])), [-1]),
             self.i)
 
-        self.gan_loss = -tf.reduce_mean(tf.compat.v1.log(self.i_prob) * self.reward) + self.lamda * (
+        self.gan_loss = -tf.reduce_mean(tf.log(self.i_prob) * self.reward) + self.lamda * (
             tf.nn.l2_loss(self.u_embedding) + tf.nn.l2_loss(self.i_embedding) + tf.nn.l2_loss(self.i_bias))
 
-        g_opt = tf.compat.v1.train.GradientDescentOptimizer(self.learning_rate)
+        g_opt = tf.train.GradientDescentOptimizer(self.learning_rate)
         self.gan_updates = g_opt.minimize(self.gan_loss, var_list=self.g_params)
 
         # for test stage, self.u: [batch_size]

@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import pickle as cPickle
 
 
@@ -13,13 +14,13 @@ class DIS():
         self.learning_rate = learning_rate
         self.d_params = []
 
-        with tf.compat.v1.variable_scope('discriminator'):
+        with tf.variable_scope('discriminator'):
             if self.param == None:
                 self.user_embeddings = tf.Variable(
-                    tf.compat.v1.random_uniform([self.userNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
+                    tf.random_uniform([self.userNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
                                       dtype=tf.float32))
                 self.item_embeddings = tf.Variable(
-                    tf.compat.v1.random_uniform([self.itemNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
+                    tf.random_uniform([self.itemNum, self.emb_dim], minval=-self.initdelta, maxval=self.initdelta,
                                       dtype=tf.float32))
                 self.item_bias = tf.Variable(tf.zeros([self.itemNum]))
             else:
@@ -30,9 +31,9 @@ class DIS():
         self.d_params = [self.user_embeddings, self.item_embeddings, self.item_bias]
 
         # placeholder definition
-        self.u = tf.compat.v1.placeholder(tf.int32)
-        self.i = tf.compat.v1.placeholder(tf.int32)
-        self.label = tf.compat.v1.placeholder(tf.float32)
+        self.u = tf.placeholder(tf.int32)
+        self.i = tf.placeholder(tf.int32)
+        self.label = tf.placeholder(tf.float32)
 
         self.u_embedding = tf.nn.embedding_lookup(self.user_embeddings, self.u)
         self.i_embedding = tf.nn.embedding_lookup(self.item_embeddings, self.i)
@@ -44,7 +45,7 @@ class DIS():
             tf.nn.l2_loss(self.u_embedding) + tf.nn.l2_loss(self.i_embedding) + tf.nn.l2_loss(self.i_bias)
         )
 
-        d_opt = tf.compat.v1.train.GradientDescentOptimizer(self.learning_rate)
+        d_opt = tf.train.GradientDescentOptimizer(self.learning_rate)
         self.d_updates = d_opt.minimize(self.pre_loss, var_list=self.d_params)
 
         self.reward_logits = tf.reduce_sum(tf.multiply(self.u_embedding, self.i_embedding),
@@ -56,7 +57,7 @@ class DIS():
                                     transpose_b=True) + self.item_bias
 
         self.all_logits = tf.reduce_sum(tf.multiply(self.u_embedding, self.item_embeddings), 1) + self.item_bias
-        self.NLL = -tf.reduce_mean(tf.compat.v1.log(
+        self.NLL = -tf.reduce_mean(tf.log(
             tf.gather(tf.reshape(tf.nn.softmax(tf.reshape(self.all_logits, [1, -1])), [-1]), self.i))
         )
         # for dns sample

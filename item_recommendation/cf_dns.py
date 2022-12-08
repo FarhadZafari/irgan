@@ -9,7 +9,7 @@ import multiprocessing
 import time
 import matplotlib.pyplot as plt
 
-cores = multiprocessing.cpu_count()/2
+cores = int(multiprocessing.cpu_count()/2)
 
 TRAIN = False
 RUN_MF = True
@@ -220,14 +220,14 @@ def evaluate(sess, model, which_set = "test"):
         index += batch_size
 
         user_batch_rating = sess.run(model.all_rating, {model.u: user_batch})
-        user_batch_rating_uid = zip(user_batch_rating, user_batch)
+        user_batch_rating_uid = list(zip(user_batch_rating, user_batch))
         batch_result = pool.map(which_func, user_batch_rating_uid)
         for re in batch_result:
             result += [re[1], re[4], re[6]]
     pool.close()
     ret = (np.array(result.tolist()[:2]) / test_user_num).tolist()
     ret.append((np.array(result.tolist()[2]) / num_ratings).tolist())
-    ret = zip(["p_5", "ndcg_5", "rmse"], ret)
+    ret = list(zip(["p_5", "ndcg_5", "rmse"], ret))
     return ret
 
 
