@@ -9,7 +9,6 @@ import multiprocessing
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from mf_model import MF
-from cf_dns import generate_uniform
 
 cores = multiprocessing.cpu_count()
 
@@ -239,6 +238,20 @@ def generate_for_d(sess, model, filename):
     with open(filename, 'w')as fout:
         fout.write('\n'.join(data))
 
+def generate_uniform(filename):
+    data = []
+    #print('uniform negative sampling...')
+    for u in user_pos_train:
+        pos = user_pos_train[u]
+        candidates = list(all_items - set(pos))
+        neg = np.random.choice(candidates, len(pos))
+        pos = np.array(pos)
+
+        for i in range(len(pos)):
+            data.append(str(u) + '\t' + str(pos[i]) + '\t' + str(neg[i]))
+
+    with open(filename, 'w')as fout:
+        fout.write('\n'.join(data))
 
 def main():
     print("load model...")
