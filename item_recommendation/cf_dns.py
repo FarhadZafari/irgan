@@ -21,14 +21,14 @@ RUN_DIS = True
 #########################################################################################
 EMB_DIM = 5
 DNS_K = 5
-workdir = 'ml-100k/'
+workdir = 'seek/'
 
 DIS_TRAIN_FILE = workdir + 'dis-train.txt'
 DIS_MODEL_FILE = workdir + "model_dns.pkl"
-dataset_deliminator = None
-user_index_original_dataset = 0
-item_index_original_dataset = 1
-rate_index_original_dataset = 2
+dataset_deliminator = ","
+user_index_original_dataset = 2
+item_index_original_dataset = 3
+rate_index_original_dataset = 4
 #########################################################################################
 # Load data
 #########################################################################################
@@ -352,6 +352,7 @@ def main():
     plt.xlabel("Iteration")
     plt.ylabel("Model Performance")
     plt.legend()
+    plt.savefig(workdir + 'dns.png')
     plt.show()
 
 if __name__ == '__main__':
