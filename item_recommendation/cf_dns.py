@@ -32,8 +32,8 @@ rate_index_original_dataset = 2
 # Load data
 #########################################################################################
 user_pos_train = {}
-all_items_ids = []
-all_user_ids = []
+all_items_ids_map = {}
+all_user_ids_map = {}
 uid_to_index = {}
 jid_to_index = {}
 
@@ -61,10 +61,10 @@ with open(workdir + 'train')as fin:
                 user_pos_train[uid].append(iid)
             else:
                 user_pos_train[uid] = [iid]
-        if iid not in all_items_ids:
-            all_items_ids.append(iid)
-        if uid not in all_user_ids:
-            all_user_ids.append(uid)
+        if iid not in all_items_ids_map:
+            all_items_ids_map[iid] = 1
+        if uid not in all_user_ids_map:
+            all_user_ids_map[uid] = 1
         NUM_RATINGS_TRAIN += 1
 
 user_pos_test = {}
@@ -90,14 +90,14 @@ with open(workdir + 'test')as fin:
                 user_pos_test[uid].append(iid)
             else:
                 user_pos_test[uid] = [iid]
-        if iid not in all_items_ids:
-            all_items_ids.append(iid)
-        if uid not in all_user_ids:
-            all_user_ids.append(uid)
+        if iid not in all_items_ids_map:
+            all_items_ids_map[iid] = 1
+        if uid not in all_user_ids_map:
+            all_user_ids_map[uid] = 1
         NUM_RATINGS_TEST += 1
 
-USER_NUM = len(all_user_ids)
-ITEM_NUM = len(all_items_ids)
+USER_NUM = len(all_user_ids_map.keys())
+ITEM_NUM = len(all_items_ids_map.keys())
 print("===>", USER_NUM, ITEM_NUM)
 all_items = set(range(ITEM_NUM))
 
