@@ -21,14 +21,14 @@ RUN_DIS = True
 #########################################################################################
 EMB_DIM = 5
 DNS_K = 5
-workdir = 'seek/'
+workdir = 'ml-100k/'
 
 DIS_TRAIN_FILE = workdir + 'dis-train.txt'
 DIS_MODEL_FILE = workdir + "model_dns.pkl"
-dataset_deliminator = ","
-user_index_original_dataset = 2
-item_index_original_dataset = 3
-rate_index_original_dataset = 4
+dataset_deliminator = None
+user_index_original_dataset = 0
+item_index_original_dataset = 1
+rate_index_original_dataset = 2
 #########################################################################################
 # Load data
 #########################################################################################
@@ -208,17 +208,22 @@ def simple_test_one_user_train(x):
 
 def evaluate(sess, model, which_set = "test"):
     num_ratings = 0
+    test_users = []
+    test_user_num = 0
     if which_set == "test":
         which_func = simple_test_one_user_test
         num_ratings = NUM_RATINGS_TEST
+        test_users = user_pos_test.keys()
+        test_user_num = len(test_users)
     else:
         which_func = simple_test_one_user_train
         num_ratings = NUM_RATINGS_TRAIN
+        test_users = user_pos_train.keys()
+        test_user_num = len(test_users)
+
     result = np.array([0.] * 3)
     pool = multiprocessing.Pool(cores)
     batch_size = 128
-    test_users = user_pos_test.keys()
-    test_user_num = len(test_users)
     index = 0
     while True:
         if index >= test_user_num:
