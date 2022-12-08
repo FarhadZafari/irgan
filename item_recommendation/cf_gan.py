@@ -57,15 +57,15 @@ with open(workdir + 'train')as fin:
         iid = int(jid_to_index[line[item_index_original_dataset]])
         #r = float(line[rate_index_original_dataset])
         r = 1
+        if iid not in all_items_ids_map:
+            all_items_ids_map[iid] = len(all_items_ids_map)
+        if uid not in all_user_ids_map:
+            all_user_ids_map[uid] = len(all_user_ids_map)
         if r > 0:
             if uid in user_pos_train:
-                user_pos_train[uid].append(iid)
+                user_pos_train[all_user_ids_map[uid]].append(all_items_ids_map[iid])
             else:
-                user_pos_train[uid] = [iid]
-        if iid not in all_items_ids_map:
-            all_items_ids_map[iid] = 1
-        if uid not in all_user_ids_map:
-            all_user_ids_map[uid] = 1
+                user_pos_train[all_user_ids_map[uid]] = [all_items_ids_map[iid]]
         NUM_RATINGS_TRAIN += 1
 
 user_pos_test = {}
@@ -86,19 +86,19 @@ with open(workdir + 'test')as fin:
         iid = int(jid_to_index[line[item_index_original_dataset]])
         #r = float(line[rate_index_original_dataset])
         r = 1
+        if iid not in all_items_ids_map:
+            all_items_ids_map[iid] = len(all_items_ids_map)
+        if uid not in all_user_ids_map:
+            all_user_ids_map[uid] = len(all_user_ids_map)
         if r > 0:
             if uid in user_pos_test:
-                user_pos_test[uid].append(iid)
+                user_pos_test[all_user_ids_map[uid]].append(all_items_ids_map[iid])
             else:
-                user_pos_test[uid] = [iid]
-        if iid not in all_items_ids_map:
-            all_items_ids_map[iid] = 1
-        if uid not in all_user_ids_map:
-            all_user_ids_map[uid] = 1
+                user_pos_test[all_user_ids_map[uid]] = [all_items_ids_map[iid]]
         NUM_RATINGS_TEST += 1
 
-USER_NUM = len(all_user_ids_map.keys())
-ITEM_NUM = len(all_items_ids_map.keys())
+USER_NUM = len(all_user_ids_map)
+ITEM_NUM = len(all_items_ids_map)
 print("--->", USER_NUM, ITEM_NUM)
 all_items = set(range(ITEM_NUM))
 
@@ -117,7 +117,6 @@ def ndcg_at_k(r, k):
         return 0.
     return dcg_at_k(r, k) / dcg_max
 
-
 def simple_test_one_user_test(x):
     rating = x[0]
     u = x[1]
@@ -132,22 +131,25 @@ def simple_test_one_user_test(x):
 
     r = []
     rmse = 0
-    for i, j in item_sort:
-        if i in user_pos_test[u]:
-            r.append(1)
-            rmse += np.square(1-j)
-        else:
-            r.append(0)
+    if u in user_pos_test:
+        for i, j in item_sort:
+            if i in user_pos_test[u]:
+                r.append(1)
+                rmse += np.square(1-j)
+            else:
+                r.append(0)
 
-    p_3 = np.mean(r[:3])
-    p_5 = np.mean(r[:5])
-    p_100 = np.mean(r[:100])
+        p_3 = np.mean(r[:3])
+        p_5 = np.mean(r[:5])
+        p_100 = np.mean(r[:100])
 
-    ndcg_3 = ndcg_at_k(r, 3)
-    ndcg_5 = ndcg_at_k(r, 5)
-    ndcg_100 = ndcg_at_k(r, 100)
+        ndcg_3 = ndcg_at_k(r, 3)
+        ndcg_5 = ndcg_at_k(r, 5)
+        ndcg_100 = ndcg_at_k(r, 100)
 
-    return np.array([p_3, p_5, p_100, ndcg_3, ndcg_5, ndcg_100, rmse])
+        return np.array([p_3, p_5, p_100, ndcg_3, ndcg_5, ndcg_100, rmse])
+    else:
+        return None
 
 def simple_test_one_user_train(x):
     rating = x[0]
@@ -163,48 +165,57 @@ def simple_test_one_user_train(x):
 
     r = []
     rmse = 0
-    for i, j in item_sort:
-        if i in user_pos_train[u]:
-            r.append(1)
-            rmse += np.square(1-j)
-        else:
-            r.append(0)
+    if u in user_pos_train:
+        for i, j in item_sort:
+            if i in user_pos_train[u]:
+                r.append(1)
+                rmse += np.square(1-j)
+            else:
+                r.append(0)
 
-    p_3 = np.mean(r[:3])
-    p_5 = np.mean(r[:5])
-    p_100 = np.mean(r[:100])
+        p_3 = np.mean(r[:3])
+        p_5 = np.mean(r[:5])
+        p_100 = np.mean(r[:100])
 
-    ndcg_3 = ndcg_at_k(r, 3)
-    ndcg_5 = ndcg_at_k(r, 5)
-    ndcg_100 = ndcg_at_k(r, 100)
+        ndcg_3 = ndcg_at_k(r, 3)
+        ndcg_5 = ndcg_at_k(r, 5)
+        ndcg_100 = ndcg_at_k(r, 100)
 
-    return np.array([p_3, p_5, p_100, ndcg_3, ndcg_5, ndcg_100, rmse])
+        return np.array([p_3, p_5, p_100, ndcg_3, ndcg_5, ndcg_100, rmse])
+    else:
+        return None
 
 def evaluate(sess, model, which_set = "test"):
     num_ratings = 0
+    test_users = []
+    test_user_num = 0
     if which_set == "test":
         which_func = simple_test_one_user_test
         num_ratings = NUM_RATINGS_TEST
+        test_users = user_pos_test.keys()
+        test_user_num = len(test_users)
     else:
         which_func = simple_test_one_user_train
         num_ratings = NUM_RATINGS_TRAIN
+        test_users = user_pos_train.keys()
+        test_user_num = len(test_users)
+
     result = np.array([0.] * 3)
     pool = multiprocessing.Pool(cores)
     batch_size = 128
-    test_users = list(user_pos_test.keys())
-    test_user_num = len(test_users)
     index = 0
     while True:
         if index >= test_user_num:
             break
-        user_batch = test_users[index:index + batch_size]
+        user_batch = list(test_users)[index:index + batch_size]
         index += batch_size
 
         user_batch_rating = sess.run(model.all_rating, {model.u: user_batch})
         user_batch_rating_uid = list(zip(user_batch_rating, user_batch))
         batch_result = pool.map(which_func, user_batch_rating_uid)
         for re in batch_result:
-            result += [re[1], re[4], re[6]]
+            if re is not None:
+                result += [re[1], re[4], re[6]]
     pool.close()
     ret = (np.array(result.tolist()[:2]) / test_user_num).tolist()
     ret.append((np.array(result.tolist()[2]) / num_ratings).tolist())
