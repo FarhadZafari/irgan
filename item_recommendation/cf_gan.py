@@ -42,7 +42,7 @@ u_index = 0
 j_index = 0
 NUM_RATINGS_TRAIN = 0
 with open(workdir + 'train')as fin:
-    for line in fin:
+    for line in tqdm(fin):
         if dataset_deliminator == None:
             line = line.split()
         else:
@@ -71,7 +71,7 @@ with open(workdir + 'train')as fin:
 user_pos_test = {}
 NUM_RATINGS_TEST = 0
 with open(workdir + 'test')as fin:
-    for line in fin:
+    for line in tqdm(fin):
         if dataset_deliminator == None:
             line = line.split()
         else:
