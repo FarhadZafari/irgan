@@ -10,7 +10,7 @@ import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-cores = int(multiprocessing.cpu_count()/2)
+cores = multiprocessing.cpu_count()
 
 TRAIN = False
 RUN_MF = True
