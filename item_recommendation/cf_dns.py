@@ -141,7 +141,9 @@ def ndcg_at_k(r, k):
 def simple_test_one_user_test(x):
     rating = x[0]
     u = x[1]
-
+    test_items = []
+    if u not in user_pos_train:
+        test_items = list(all_items)
     test_items = list(all_items - set(user_pos_train[u]))
     item_score = []
     for i in test_items:
@@ -175,7 +177,6 @@ def simple_test_one_user_test(x):
 def simple_test_one_user_train(x):
     rating = x[0]
     u = x[1]
-
     test_items = list(all_items)
     item_score = []
     for i in test_items:
