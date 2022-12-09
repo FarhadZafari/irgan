@@ -144,7 +144,8 @@ def simple_test_one_user_test(x):
     test_items = []
     if u not in user_pos_train:
         test_items = list(all_items)
-    test_items = list(all_items - set(user_pos_train[u]))
+    else:
+        test_items = list(all_items - set(user_pos_train[u]))
     item_score = []
     for i in test_items:
         item_score.append((i, rating[i]))
