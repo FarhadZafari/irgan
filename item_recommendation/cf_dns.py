@@ -297,7 +297,7 @@ def main():
 
     for epoch in range(30):
         with open(DIS_TRAIN_FILE) as fin:
-            for line in fin:
+            for line in tqdm(fin):
                 line = line.split()
                 u = int(line[0])
                 i = int(line[1])

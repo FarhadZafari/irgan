@@ -326,7 +326,7 @@ def main():
 
         # Train G
         for g_epoch in tqdm(range(num_iterations_gen)):  # 50
-            for u in user_pos_train:
+            for u in tqdm(user_pos_train):
                 sample_lambda = 0.2
                 pos = user_pos_train[u]
 
@@ -358,7 +358,7 @@ def main():
                 generator.save_model(sess, workdir + "gan_generator.pkl")
 
         with open(DIS_TRAIN_FILE_UNIFORM) as fmf:
-            for line in fmf:
+            for line in tqdm(fmf):
                 line = line.split()
                 u = int(line[0])
                 i = int(line[1])
