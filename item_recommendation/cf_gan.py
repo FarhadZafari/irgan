@@ -203,12 +203,10 @@ def evaluate(sess, model, which_set = "test"):
     pool = multiprocessing.Pool(cores)
     batch_size = 128
     index = 0
-    while True:
-        if index >= test_user_num:
-            break
-        user_batch = list(test_users)[index:index + batch_size]
-        index += batch_size
-
+    for index in tqdm(range(0, test_user_num, batch_size)):
+        if index + batch_size >= test_user_num:
+            end_index = index + batch_size
+        user_batch = list(test_users)[index:end_index]
         user_batch_rating = sess.run(model.all_rating, {model.u: user_batch})
         user_batch_rating_uid = list(zip(user_batch_rating, user_batch))
         batch_result = pool.map(which_func, user_batch_rating_uid)
