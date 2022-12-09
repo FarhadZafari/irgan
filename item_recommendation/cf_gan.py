@@ -203,6 +203,7 @@ def evaluate(sess, model, which_set = "test"):
     pool = multiprocessing.Pool(cores)
     batch_size = 128
     index = 0
+    end_index = 0
     for index in tqdm(range(0, test_user_num, batch_size)):
         if index + batch_size >= test_user_num:
             end_index = index + batch_size
